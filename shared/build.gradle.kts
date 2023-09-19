@@ -8,6 +8,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.android.library")
     id("org.jetbrains.compose")
+    id("app.cash.sqldelight")
     id("com.codingfeline.buildkonfig")
 }
 
@@ -25,10 +26,22 @@ buildkonfig {
 kotlin {
     val ktorVersion = "2.2.3"
     val coroutinesVersion = "1.7.1"
+    val sqlDelightVersion = "2.0.0-alpha05"
+    val koinVersion = "3.2.0"
 
     androidTarget()
 
     jvm("desktop")
+
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        kotlinOptions.jvmTarget = "11"
+    }
+
+    kotlin {
+        jvmToolchain {
+            (this as JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(11))
+        }
+    }
 
     tasks.withType<Test> {
         useJUnitPlatform()
@@ -49,19 +62,33 @@ kotlin {
                 implementation("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
                 implementation("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
                 implementation("io.ktor:ktor-client-logging:${ktorVersion}")
+                // SqlDelight
+                implementation("app.cash.sqldelight:coroutines-extensions:${sqlDelightVersion}")
+                implementation("app.cash.sqldelight:primitive-adapters:${sqlDelightVersion}")
+                // Koin
+                implementation("io.insert-koin:koin-core:$koinVersion")
+                implementation("io.insert-koin:koin-test:$koinVersion")
             }
         }
         val commonTest by getting {
             dependencies {
-                implementation(kotlin("test"))
-                implementation(kotlin("test-common"))
-                implementation(kotlin("test-annotations-common"))
+                //implementation(kotlin("test"))
+                //implementation(kotlin("test-common"))
+                //implementation(kotlin("test-annotations-common"))
+                implementation("org.junit.jupiter:junit-jupiter:5.8.2")
+
                 // kotest
-                implementation("io.kotest:kotest-runner-junit5:5.3.1")
-                implementation("io.kotest:kotest-assertions-core:5.3.1")
-                implementation("io.kotest:kotest-property:5.3.1")
+                implementation("io.kotest:kotest-runner-junit5:5.7.2")
+                implementation("io.kotest:kotest-assertions-core:5.7.2")
+                implementation("io.kotest:kotest-property:5.7.2")
                 implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
                 implementation("io.ktor:ktor-client-mock:$ktorVersion")
+                // Koin
+                implementation("io.insert-koin:koin-core:$koinVersion")
+                implementation("io.insert-koin:koin-test:$koinVersion")
+
+                // SqlDelight
+                implementation("app.cash.sqldelight:sqlite-driver:${sqlDelightVersion}")
             }
         }
         val androidMain by getting {
@@ -69,15 +96,27 @@ kotlin {
                 api("androidx.activity:activity-compose:1.7.2")
                 api("androidx.appcompat:appcompat:1.6.1")
                 api("androidx.core:core-ktx:1.10.1")
+
                 // Ktor
                 implementation("io.ktor:ktor-client-android:${ktorVersion}")
+
+                // SqlDelight
+                implementation("app.cash.sqldelight:android-driver:${sqlDelightVersion}")
+
+                // Koin
+                implementation("io.insert-koin:koin-android:$koinVersion")
             }
         }
         val desktopMain by getting {
             dependsOn(commonMain)
             dependencies {
                 implementation(compose.desktop.common)
+
+                // Ktor
                 implementation("io.ktor:ktor-client-java:${ktorVersion}")
+
+                // SqlDelight
+                implementation("app.cash.sqldelight:sqlite-driver:${sqlDelightVersion}")
             }
         }
     }
@@ -100,5 +139,13 @@ android {
     }
     kotlin {
         jvmToolchain(11)
+    }
+}
+
+sqldelight {
+    databases {
+        create("WeatherDatabase") {
+            packageName.set("com.weatherapp.core.database")
+        }
     }
 }

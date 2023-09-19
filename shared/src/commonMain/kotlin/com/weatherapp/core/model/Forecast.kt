@@ -15,7 +15,7 @@ data class Forecast(
     val windSpeed: String,
     val windDirectionDegrees: String,
     val windGust: String,
-    val visibilityMeters: String,
+    val visibilityMeters: Int,
     val location: Location
 ) {
     val weatherIconUrl get() =

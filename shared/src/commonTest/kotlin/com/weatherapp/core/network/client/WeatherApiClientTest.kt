@@ -344,7 +344,8 @@ class WeatherApiClientTest {
             latitude = "49.9923181",
             longitude = "36.2310146",
             country = "UA",
-            state = "Kharkivska"
+            state = "Kharkivska",
+            zip = ""
         )
     }
 

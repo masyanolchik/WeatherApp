@@ -13,6 +13,7 @@ plugins {
     // in each subproject's classloader
     kotlin("multiplatform").apply(false)
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10" apply false
+    id("app.cash.sqldelight") version "2.0.0-alpha05" apply false
     id("com.android.application").apply(false)
     id("com.android.library").apply(false)
     id("org.jetbrains.compose").apply(false)

@@ -1,0 +1,44 @@
+CREATE TABLE IF NOT EXISTS forecastEntity (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date INTEGER NOT NULL,
+  temperature TEXT NOT NULL,
+  feelsLikeTemperature TEXT NOT NULL,
+  humidityPercentage TEXT NOT NULL,
+  weatherTitle TEXT NOT NULL,
+  weatherDescription TEXT NOT NULL,
+  weatherIconId TEXT NOT NULL,
+  cloudinessPercentage TEXT NOT NULL,
+  windSpeed TEXT NOT NULL,
+  windDirectionDegrees TEXT NOT NULL,
+  windGust TEXT NOT NULL,
+  visibilityMeters INTEGER NOT NULL,
+  locationId INTEGER NOT NULL,
+  FOREIGN KEY(locationId) REFERENCES locationEntity(id)
+);
+
+selectAll:
+SELECT * FROM forecastEntity;
+
+delete:
+DELETE FROM forecastEntity WHERE id = :id;
+
+insert:
+INSERT OR REPLACE INTO forecastEntity(
+    date,
+    temperature,
+    feelsLikeTemperature,
+    humidityPercentage,
+    weatherTitle,
+    weatherDescription,
+    weatherIconId,
+    cloudinessPercentage,
+    windSpeed,
+    windDirectionDegrees,
+    windGust,
+    visibilityMeters,
+    locationId
+  )
+VALUES ?;
+
+getLocationById:
+SELECT * FROM locationEntity WHERE id = :id;
