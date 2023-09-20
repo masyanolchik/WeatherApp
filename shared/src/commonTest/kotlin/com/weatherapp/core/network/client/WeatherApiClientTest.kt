@@ -4,9 +4,6 @@ import com.weatherapp.core.model.Location
 import com.weatherapp.core.model.WeatherUnit
 import com.weatherapp.core.network.error.WeatherApiException
 import com.weatherapp.core.network.error.WeatherError
-import com.weatherapp.core.network.model.LocationQueryApiResponse
-import com.weatherapp.core.network.model.LocationZipApiResponse
-import io.kotest.core.spec.style.AnnotationSpec
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandleScope
@@ -32,9 +29,9 @@ class WeatherApiClientTest {
         val httpClient = getHttpClient(LOCATION_QUERY_SUCCESS)
         val apiClient = WeatherApiClient(httpClient)
 
-        val locations = apiClient.getLocationByQuery("").first()
+        val location = apiClient.getLocationsByQuery("").first()
 
-        assertTrue(locations.isNotEmpty())
+        assertTrue(location.name == "Kharkiv")
     }
 
     @Test
@@ -43,7 +40,7 @@ class WeatherApiClientTest {
         val apiClient = WeatherApiClient(httpClient)
 
         try {
-            apiClient.getLocationByQuery("").first()
+            apiClient.getLocationsByQuery("").first()
         } catch (ex: Exception) {
             assertTrue(ex is WeatherApiException)
             assertTrue(
@@ -58,7 +55,7 @@ class WeatherApiClientTest {
         val apiClient = WeatherApiClient(httpClient)
 
         try {
-            apiClient.getLocationByQuery("").first()
+            apiClient.getLocationsByQuery("").first()
         } catch (ex: Exception) {
             assertTrue(ex is WeatherApiException)
             assertTrue(
@@ -73,7 +70,7 @@ class WeatherApiClientTest {
         val apiClient = WeatherApiClient(httpClient)
 
         try {
-            apiClient.getLocationByQuery("").first()
+            apiClient.getLocationsByQuery("").first()
         } catch (ex: Exception) {
             assertTrue(ex is WeatherApiException)
             assertTrue(
@@ -88,7 +85,7 @@ class WeatherApiClientTest {
         val apiClient = WeatherApiClient(httpClient)
 
         try {
-            apiClient.getLocationByQuery("").first()
+            apiClient.getLocationsByQuery("").first()
         } catch (ex: Exception) {
             assertTrue(ex is WeatherApiException)
             assertTrue(
@@ -104,7 +101,7 @@ class WeatherApiClientTest {
         val apiClient = WeatherApiClient(httpClient)
 
         try {
-            apiClient.getLocationByQuery("").first()
+            apiClient.getLocationsByQuery("").first()
         } catch (ex: Exception) {
             assertTrue(ex is WeatherApiException)
             assertTrue(
@@ -119,7 +116,7 @@ class WeatherApiClientTest {
         val httpClient = getHttpClient(LOCATION_ZIP_SUCCESS)
         val apiClient = WeatherApiClient(httpClient)
 
-        val location = apiClient.getLocationByZipCode("").first()
+        val location = apiClient.getLocationsByZipCode("")
 
         assertTrue(location.country == "UA")
     }
@@ -129,53 +126,53 @@ class WeatherApiClientTest {
         val httpClient = getHttpClient(FORECAST_SUCCESS)
         val apiClient = WeatherApiClient(httpClient)
 
-        val forecast = apiClient.getWeatherForecast(LOCATION_ENTITY, WeatherUnit.METRIC).first()
+        val forecast = apiClient.getWeatherForecast(LOCATION_ENTITY, WeatherUnit.METRIC)
 
         assertTrue(forecast.city.name == "Kharkiv")
 
     }
 
-    private fun getHttpClient(
-        response: String = "",
-        statusCode: HttpStatusCode = HttpStatusCode.OK,
-        shouldThrowException: Boolean = false
-    ): HttpClient {
-        val mockEngine = getMockEngine(response, statusCode, shouldThrowException)
-        return HttpClient(mockEngine) {
-            install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                })
-            }
-        }
-    }
-
-    private fun getMockEngine(
-        response: String,
-        statusCode: HttpStatusCode,
-        shouldThrowException: Boolean,
-    ): MockEngine {
-        return MockEngine { _ ->
-            if (shouldThrowException) {
-                throw IOException("Something goes wrong during request")
-            } else {
-                getHttpResponseData(response, statusCode)
-            }
-        }
-    }
-
-    private fun MockRequestHandleScope.getHttpResponseData(
-        response: String,
-        statusCode: HttpStatusCode
-    ): HttpResponseData {
-        return respond(
-            content = ByteReadChannel(response),
-            status = statusCode,
-            headers = headersOf(HttpHeaders.ContentType, "application/json")
-        )
-    }
-
     companion object {
+        fun getHttpClient(
+            response: String = "",
+            statusCode: HttpStatusCode = HttpStatusCode.OK,
+            shouldThrowException: Boolean = false
+        ): HttpClient {
+            val mockEngine = getMockEngine(response, statusCode, shouldThrowException)
+            return HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    json(Json {
+                        ignoreUnknownKeys = true
+                    })
+                }
+            }
+        }
+
+        fun getMockEngine(
+            response: String,
+            statusCode: HttpStatusCode,
+            shouldThrowException: Boolean,
+        ): MockEngine {
+            return MockEngine { request ->
+                if (shouldThrowException) {
+                    throw IOException("Something goes wrong during request")
+                } else {
+                    getHttpResponseData(response, statusCode)
+                }
+            }
+        }
+
+        fun MockRequestHandleScope.getHttpResponseData(
+            response: String,
+            statusCode: HttpStatusCode
+        ): HttpResponseData {
+            return respond(
+                content = ByteReadChannel(response),
+                status = statusCode,
+                headers = headersOf(HttpHeaders.ContentType, "application/json")
+            )
+        }
+
         const val LOCATION_QUERY_SUCCESS =
             "[\n" +
                     "    {\n" +

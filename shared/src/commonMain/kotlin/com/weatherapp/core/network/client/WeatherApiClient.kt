@@ -9,8 +9,6 @@ import com.weatherapp.core.network.model.LocationZipApiResponse
 import com.weatherapp.core.network.model.WeatherApiResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
@@ -18,32 +16,27 @@ class WeatherApiClient(
     private val httpClient: HttpClient
 ) {
 
-    suspend fun getLocationByQuery(query: String): Flow<List<LocationQueryApiResponse>> {
-        return flowOf(
-            handleErrors {
+    suspend fun getLocationsByQuery(query: String): List<LocationQueryApiResponse> {
+        return handleErrors {
                 httpClient.get(NetworkConstants.LocationApi.byQuery(query)) {
                     contentType(ContentType.Application.Json)
                 }
             }
-        )
     }
 
-    suspend fun getLocationByZipCode(zip: String): Flow<LocationZipApiResponse> {
-        return flowOf(
-            handleErrors {
+    suspend fun getLocationsByZipCode(zip: String): LocationZipApiResponse {
+        return handleErrors {
                 httpClient.get(NetworkConstants.LocationApi.byZip(zip)) {
                     contentType(ContentType.Application.Json)
                 }
             }
-        )
     }
 
     suspend fun getWeatherForecast(
         location: Location,
         weatherUnit: WeatherUnit
-    ): Flow<WeatherApiResponse> {
-        return flowOf(
-            handleErrors {
+    ): WeatherApiResponse {
+        return handleErrors {
                 httpClient.get(
                     NetworkConstants.WeatherForecastApi.byCoordinates(
                         location.latitude,
@@ -52,6 +45,5 @@ class WeatherApiClient(
                     )
                 )
             }
-        )
     }
 }

@@ -15,6 +15,20 @@ class LocationDao(
         query.insert(locationEntity)
     }
 
+    suspend fun update(locationEntity: LocationEntity) = withContext(weatherAppDispatchers.io) {
+        val locationEntityId = getLocationByLatitudeLongitude(locationEntity.latitude, locationEntity.longtitude).id
+        query.update(
+            locationEntity.selected,
+            locationEntity.name,
+            locationEntity.latitude,
+            locationEntity.longtitude,
+            locationEntity.country,
+            locationEntity.state,
+            locationEntity.zip,
+            locationEntityId
+        )
+    }
+
     suspend fun delete(id: Long) = withContext(weatherAppDispatchers.io) {
         query.delete(id)
     }
@@ -25,6 +39,10 @@ class LocationDao(
 
     suspend fun getLocationByLatitudeLongitude(lat: String, lon: String) = withContext(weatherAppDispatchers.io) {
         query.selectByLatLon(lat, lon).executeAsOne()
+    }
+
+    suspend fun getSelectedLocation() = withContext(weatherAppDispatchers.io) {
+        query.getSelected().executeAsOne()
     }
 
     suspend fun clearTable() = withContext(weatherAppDispatchers.io) {

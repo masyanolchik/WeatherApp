@@ -12,6 +12,7 @@ import org.koin.java.KoinJavaComponent.inject
 import org.koin.test.KoinTest
 import java.io.File
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class LocationDaoTest : KoinTest {
@@ -56,6 +57,44 @@ class LocationDaoTest : KoinTest {
         assertTrue(insertedLocationEntities.contains(SAMPLE_LOCATION_ENTITY))
 
         after()
+    }
+
+    @Test
+    fun testLocationDao_update() = runTest {
+        before()
+
+        this.testScheduler.advanceUntilIdle()
+        locationDao.insert(SAMPLE_LOCATION_ENTITY)
+
+        val insertedLocationEntity = locationDao.getAllLocations().first()
+        locationDao.update(SAMPLE_LOCATION_ENTITY.copy(selected = 1))
+        val updatedLocationEntity = locationDao.getAllLocations().first()
+
+        assertEquals(insertedLocationEntity, SAMPLE_LOCATION_ENTITY)
+        assertNotEquals(insertedLocationEntity, updatedLocationEntity)
+        assertTrue(updatedLocationEntity.selected == 1L)
+
+        after()
+
+    }
+
+    @Test
+    fun testLocationDao_getSelectedLocation() = runTest {
+        before()
+
+        this.testScheduler.advanceUntilIdle()
+        locationDao.insert(SAMPLE_LOCATION_ENTITY)
+
+        val insertedLocationEntity = locationDao.getAllLocations().first()
+        locationDao.update(SAMPLE_LOCATION_ENTITY.copy(selected = 1))
+        val updatedLocationEntity = locationDao.getSelectedLocation()
+
+        assertEquals(insertedLocationEntity, SAMPLE_LOCATION_ENTITY)
+        assertNotEquals(insertedLocationEntity, updatedLocationEntity)
+        assertTrue(updatedLocationEntity.selected == 1L)
+
+        after()
+
     }
 
     @Test
@@ -115,7 +154,8 @@ class LocationDaoTest : KoinTest {
             longtitude = "lon",
             country = "US",
             state = "CA",
-            zip = ""
+            zip = "",
+            selected = 0
         )
     }
 }

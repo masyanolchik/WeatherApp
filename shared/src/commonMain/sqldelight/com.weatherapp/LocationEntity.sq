@@ -1,9 +1,10 @@
-CREATE TABLE IF NOT EXISTS locationEntity (
+CREATE TABLE IF NOT EXISTS locationEntity(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   latitude TEXT NOT NULL,
   longtitude TEXT NOT NULL,
   country TEXT NOT NULL,
+  selected INTEGER NOT NULL,
   state TEXT,
   zip TEXT
 );
@@ -14,9 +15,24 @@ SELECT * FROM locationEntity;
 selectByLatLon:
 SELECT * FROM locationEntity WHERE latitude = :lat AND longtitude = :lon;
 
+getSelected:
+SELECT * FROM locationEntity WHERE selected = 1;
+
 insert:
-INSERT OR REPLACE INTO locationEntity(name, latitude, longtitude, country, state, zip)
+INSERT OR REPLACE INTO locationEntity(name, latitude, longtitude, country, selected, state, zip)
 VALUES ?;
+
+update:
+UPDATE locationEntity SET
+        selected = :selected,
+        name = :name,
+        latitude = :lat,
+        longtitude = :lon,
+        country = :country,
+        state = :state,
+        zip = :zip
+        WHERE id = :id;
+
 
 delete:
 DELETE FROM locationEntity WHERE id = :id;

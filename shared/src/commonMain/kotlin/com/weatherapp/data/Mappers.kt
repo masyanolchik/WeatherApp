@@ -25,9 +25,10 @@ fun LocationZipApiResponse.toLocation() = Location(
     zip = zip
 )
 
-fun Location.toLocationEntity() = LocationEntity(
+fun Location.toLocationEntity(isSelected: Boolean) = LocationEntity(
     id = 0L,
     name = name,
+    selected = if(isSelected) 1 else 0,
     latitude = latitude,
     longtitude = longitude,
     country = country,
@@ -35,16 +36,16 @@ fun Location.toLocationEntity() = LocationEntity(
     zip = zip
 )
 
-fun WeatherApiResponse.toForecasts() = buildList<Forecast> {
-    val location = Location(
-        name = city.name,
-        latitude = city.coord.lat.toString(),
-        longitude = city.coord.lon.toString(),
-        country = city.country,
-        state = "",
-        zip = ""
-    )
+fun LocationEntity.toLocation() = Location(
+    name = name,
+    latitude = latitude,
+    longitude = longtitude,
+    country = country,
+    state = state ?: "",
+    zip = zip ?: ""
+)
 
+fun WeatherApiResponse.toForecasts(location: Location) = buildList {
     addAll(list.map {
         Forecast(
             date = it.dt,
