@@ -75,7 +75,6 @@ class LocationRepositoryImplTest : KoinTest {
 
         assertTrue(location.isSuccess)
         assertTrue(location.getOrNull()?.map { it.state }?.contains("Kharkiv Oblast") ?: false)
-        //assertTrue(location.getOrNull()?.map { it.zip }?.contains("61000") ?: false)
 
         after()
     }

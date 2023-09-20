@@ -5,6 +5,7 @@ import com.weatherapp.core.model.Location
 import com.weatherapp.core.network.model.LocationQueryApiResponse
 import com.weatherapp.core.network.model.LocationZipApiResponse
 import com.weatherapp.core.network.model.WeatherApiResponse
+import comweatherapp.ForecastEntity
 import comweatherapp.LocationEntity
 
 fun LocationQueryApiResponse.toLocation() = Location(
@@ -64,3 +65,36 @@ fun WeatherApiResponse.toForecasts(location: Location) = buildList {
         )
     })
 }
+
+fun Forecast.toForecastEntity(locationEntity: LocationEntity) = ForecastEntity(
+    id = 0,
+    date = date,
+    temperature = temperature,
+    feelsLikeTemperature = feelsLikeTemperature,
+    humidityPercentage = humidityPercentage,
+    weatherTitle = weatherTitle,
+    weatherDescription = weatherDescription,
+    weatherIconId = weatherIconId,
+    cloudinessPercentage = cloudinessPercentage,
+    windSpeed = windSpeed,
+    windDirectionDegrees = windDirectionDegrees,
+    windGust = windGust,
+    visibilityMeters = visibilityMeters.toLong(),
+    locationId = locationEntity.id
+)
+
+fun ForecastEntity.toForecast(location: Location) = Forecast(
+    date = date,
+    temperature = temperature,
+    feelsLikeTemperature = feelsLikeTemperature,
+    humidityPercentage = humidityPercentage,
+    weatherTitle = weatherTitle,
+    weatherDescription = weatherDescription,
+    weatherIconId = weatherIconId,
+    cloudinessPercentage = cloudinessPercentage,
+    windSpeed = windSpeed,
+    windDirectionDegrees = windDirectionDegrees,
+    windGust = windGust,
+    visibilityMeters = visibilityMeters.toInt(),
+    location = location
+)

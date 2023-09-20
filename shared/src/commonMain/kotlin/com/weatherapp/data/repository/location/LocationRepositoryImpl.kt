@@ -6,7 +6,6 @@ import com.weatherapp.core.network.client.WeatherApiClient
 import com.weatherapp.data.toLocation
 import com.weatherapp.data.toLocationEntity
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 
 class LocationRepositoryImpl(
