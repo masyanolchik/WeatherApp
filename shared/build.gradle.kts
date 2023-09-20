@@ -28,6 +28,8 @@ kotlin {
     val coroutinesVersion = "1.7.1"
     val sqlDelightVersion = "2.0.0-alpha05"
     val koinVersion = "3.2.0"
+    val mviKotlinVersion = "3.1.0"
+    val kotlinDecomposeVersion = "1.0.0-compose-experimental"
 
     androidTarget()
 
@@ -68,6 +70,16 @@ kotlin {
                 // Koin
                 implementation("io.insert-koin:koin-core:$koinVersion")
                 implementation("io.insert-koin:koin-test:$koinVersion")
+                
+                // MVIKotlin
+                implementation("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
+                implementation("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
+                implementation("com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines:$mviKotlinVersion")
+
+                //Decompose
+                implementation("com.arkivanov.decompose:decompose:$kotlinDecomposeVersion")
+                implementation("com.arkivanov.decompose:extensions-compose-jetbrains:$kotlinDecomposeVersion")
+
             }
         }
         val commonTest by getting {
@@ -83,12 +95,13 @@ kotlin {
                 implementation("io.kotest:kotest-property:5.7.2")
                 implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
                 implementation("io.ktor:ktor-client-mock:$ktorVersion")
+
                 // Koin
                 implementation("io.insert-koin:koin-core:$koinVersion")
                 implementation("io.insert-koin:koin-test:$koinVersion")
 
                 // SqlDelight
-                implementation("app.cash.sqldelight:sqlite-driver:${sqlDelightVersion}")
+                implementation("app.cash.sqldelight:sqlite-driver:$sqlDelightVersion")
             }
         }
         val androidMain by getting {
