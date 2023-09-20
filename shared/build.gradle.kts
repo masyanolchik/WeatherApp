@@ -55,6 +55,9 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material)
+                implementation(compose.material3)
+                implementation(compose.materialIconsExtended)
+
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.components.resources)
                 // Kotlin Serialization
@@ -70,7 +73,7 @@ kotlin {
                 // Koin
                 implementation("io.insert-koin:koin-core:$koinVersion")
                 implementation("io.insert-koin:koin-test:$koinVersion")
-                
+
                 // MVIKotlin
                 implementation("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
                 implementation("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
