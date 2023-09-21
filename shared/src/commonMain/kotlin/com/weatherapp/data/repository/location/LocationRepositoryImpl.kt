@@ -15,6 +15,7 @@ class LocationRepositoryImpl(
     override suspend fun getLocations(query: String): Flow<Result<List<Location>>> {
         var result: Result<List<Location>>
         try {
+            locationDao.clearTable()
             val locationQueryList =
                 weatherApiClient.getLocationsByQuery(query)
                     .map {

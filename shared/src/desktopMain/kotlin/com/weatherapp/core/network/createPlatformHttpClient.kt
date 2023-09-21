@@ -1,7 +1,8 @@
 package com.weatherapp.core.network
 
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.java.Java
 
 actual fun createPlatformHttpClient(): HttpClient {
-    TODO("Not yet implemented")
+    return HttpClient(Java)
 }

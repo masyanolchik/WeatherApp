@@ -20,7 +20,7 @@ fun LocationItem(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = location.toString(),
+            text = "${location.name}, ${location.state}${location.zip}, ${location.country}",
             style = MaterialTheme.typography.subtitle1,
             modifier = modifier
                 .padding(horizontal = 12.dp, vertical = 8.dp)

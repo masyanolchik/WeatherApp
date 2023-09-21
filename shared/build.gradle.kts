@@ -1,4 +1,3 @@
-import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import java.io.File
 import java.io.FileInputStream
 import java.util.*
@@ -32,7 +31,6 @@ kotlin {
     val kotlinDecomposeVersion = "1.0.0-compose-experimental"
 
     androidTarget()
-
     jvm("desktop")
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
@@ -70,6 +68,7 @@ kotlin {
                 // SqlDelight
                 implementation("app.cash.sqldelight:coroutines-extensions:${sqlDelightVersion}")
                 implementation("app.cash.sqldelight:primitive-adapters:${sqlDelightVersion}")
+
                 // Koin
                 implementation("io.insert-koin:koin-core:$koinVersion")
                 implementation("io.insert-koin:koin-test:$koinVersion")
@@ -78,6 +77,9 @@ kotlin {
                 implementation("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
                 implementation("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
                 implementation("com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines:$mviKotlinVersion")
+
+                //Coroutines
+                implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
 
                 //Decompose
                 implementation("com.arkivanov.decompose:decompose:$kotlinDecomposeVersion")
@@ -127,6 +129,8 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(compose.desktop.common)
+                implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:$coroutinesVersion")
 
                 // Ktor
                 implementation("io.ktor:ktor-client-java:${ktorVersion}")

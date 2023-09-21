@@ -18,7 +18,7 @@ class LocationDao(
     suspend fun update(locationEntity: LocationEntity) = withContext(weatherAppDispatchers.io) {
         val locationEntityId = getLocationByLatitudeLongitude(locationEntity.latitude, locationEntity.longtitude).id
         query.update(
-            locationEntity.selected,
+            locationEntity.chosen,
             locationEntity.name,
             locationEntity.latitude,
             locationEntity.longtitude,

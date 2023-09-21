@@ -2,7 +2,9 @@ package com.weatherapp.ui.locationselection.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -35,20 +37,24 @@ fun LocationSearchBar(
     errorHasOccurred: Boolean = false,
     errorMessage: String = "",
     isLoading: Boolean = false,
+    isActive: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    var active by rememberSaveable { mutableStateOf(false) }
+    var text by rememberSaveable { mutableStateOf(query) }
 
     Box(modifier.semantics { isTraversalGroup = true }) {
         SearchBar(
-            modifier = Modifier.align(Alignment.TopCenter),
-            query = query,
-            onQueryChange = onQueryChange,
-            onSearch = { active = false },
-            active = active,
-            onActiveChange = {
-                active = it
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .wrapContentHeight(),
+            query = text,
+            onQueryChange = {
+                text = it
+                onQueryChange(text)
             },
+            onSearch = { },
+            active = isActive,
+            onActiveChange = {},
             placeholder = {
                 Text("Search: London or 61000,UA for a ZIP code")
             },
@@ -56,7 +62,7 @@ fun LocationSearchBar(
         ) {
             when {
                 errorHasOccurred -> {
-                    Box {
+                    Box(modifier = modifier.fillMaxWidth()) {
                         Row(
                             modifier = Modifier.align(Alignment.Center)
                         ) {
@@ -66,7 +72,7 @@ fun LocationSearchBar(
                     }
                 }
                 isLoading -> {
-                    Box {
+                    Box(modifier = modifier.fillMaxWidth()) {
                        CircularProgressIndicator(
                            modifier = Modifier.align(Alignment.Center)
                        )

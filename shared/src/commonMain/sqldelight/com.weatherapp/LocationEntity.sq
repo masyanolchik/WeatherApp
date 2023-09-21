@@ -4,9 +4,9 @@ CREATE TABLE IF NOT EXISTS locationEntity(
   latitude TEXT NOT NULL,
   longtitude TEXT NOT NULL,
   country TEXT NOT NULL,
-  selected INTEGER NOT NULL,
   state TEXT,
-  zip TEXT
+  zip TEXT,
+  chosen INTEGER NOT NULL
 );
 
 selectAll:
@@ -16,15 +16,15 @@ selectByLatLon:
 SELECT * FROM locationEntity WHERE latitude = :lat AND longtitude = :lon;
 
 getSelected:
-SELECT * FROM locationEntity WHERE selected = 1;
+SELECT * FROM locationEntity WHERE chosen = 1;
 
 insert:
-INSERT OR REPLACE INTO locationEntity(name, latitude, longtitude, country, selected, state, zip)
+INSERT OR REPLACE INTO locationEntity(name, latitude, longtitude, country, chosen, state, zip)
 VALUES ?;
 
 update:
 UPDATE locationEntity SET
-        selected = :selected,
+        chosen = :chosen,
         name = :name,
         latitude = :lat,
         longtitude = :lon,

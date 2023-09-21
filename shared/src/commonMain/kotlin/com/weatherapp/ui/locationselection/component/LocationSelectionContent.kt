@@ -2,6 +2,7 @@ package com.weatherapp.ui.locationselection.component
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.weatherapp.core.model.Location
@@ -36,6 +37,13 @@ fun LocationSelectionContent(
                 isLoading = true,
                 modifier = modifier,
             )
+
+        is LocationSelectionStore.State.SelectedLocation ->
+            StatefulLocationSearchBar(
+                state = state,
+                onEvent = onEvent,
+                modifier = modifier
+            )
     }
 }
 
@@ -61,7 +69,8 @@ fun StatefulLocationSearchBar(
         locationList = locationList,
         errorHasOccurred = errorHasOccurred,
         errorMessage = errorMessage,
-        isLoading = isLoading
+        isLoading = isLoading,
+        isActive = state.isActive
     )
 }
 
