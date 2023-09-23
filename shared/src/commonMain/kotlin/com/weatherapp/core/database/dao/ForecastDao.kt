@@ -16,9 +16,7 @@ class ForecastDao(
     }
 
     suspend fun getAllForecasts() = withContext(weatherAppDispatchers.io) {
-        query.selectAll().executeAsList().map {
-            Pair(it,query.getLocationById(it.locationId).executeAsOne())
-        }
+        query.selectAll().executeAsList()
     }
 
     suspend fun delete(id: Long) = withContext(weatherAppDispatchers.io) {
@@ -27,7 +25,7 @@ class ForecastDao(
 
     suspend fun clearTable() = withContext(weatherAppDispatchers.io) {
         getAllForecasts().forEach {
-            delete(it.first.id)
+            delete(it.id)
         }
     }
 }

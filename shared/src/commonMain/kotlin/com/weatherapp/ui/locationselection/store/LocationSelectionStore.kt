@@ -1,6 +1,7 @@
 package com.weatherapp.ui.locationselection.store
 
 import com.arkivanov.mvikotlin.core.store.Store
+import com.weatherapp.core.model.Forecast
 import com.weatherapp.core.model.Location
 
 interface LocationSelectionStore
@@ -9,13 +10,22 @@ interface LocationSelectionStore
     sealed class Intent {
         data class EnterSearchQueryIntent(val searchQuery: String): Intent()
         data class ChoseCurrentLocation(val location: Location): Intent()
+        data class ShowForecastsForLocation(val location: Location): Intent()
     }
 
     sealed class State() {
         open val searchQuery: String = ""
-        open val isActive: Boolean = false
+        open val isSearchActive: Boolean = false
+        open val isLoadingForecasts: Boolean = false
+        open val isErrorLoadingForecasts: Boolean = false
+        open val locationForecasts: List<Forecast> = emptyList()
 
-        class SelectedLocation(override val searchQuery: String,) : State() {
+        class SelectedLocation(
+            override val searchQuery: String = "",
+            override val isLoadingForecasts: Boolean = false,
+            override val isErrorLoadingForecasts: Boolean = false,
+            override val locationForecasts: List<Forecast> = emptyList()
+        ) : State() {
             override fun equals(other: Any?): Boolean {
                 if (this === other) return true
                 if (javaClass != other?.javaClass) return false
@@ -23,19 +33,23 @@ interface LocationSelectionStore
                 other as SelectedLocation
 
                 if (searchQuery != other.searchQuery) return false
-                if (isActive != other.isActive) return false
+                if (isLoadingForecasts != other.isLoadingForecasts) return false
+                if (isErrorLoadingForecasts != other.isErrorLoadingForecasts) return false
+                if (locationForecasts != other.locationForecasts) return false
 
                 return true
             }
 
             override fun hashCode(): Int {
                 var result = searchQuery.hashCode()
-                result = 31 * result + isActive.hashCode()
+                result = 31 * result + isLoadingForecasts.hashCode()
+                result = 31 * result + isErrorLoadingForecasts.hashCode()
+                result = 31 * result + locationForecasts.hashCode()
                 return result
             }
         }
 
-        class Loading(override val searchQuery: String, override val isActive: Boolean): State() {
+        class Loading(override val searchQuery: String, override val isSearchActive: Boolean): State() {
             override fun equals(other: Any?): Boolean {
                 if (this === other) return true
                 if (javaClass != other?.javaClass) return false
@@ -43,19 +57,19 @@ interface LocationSelectionStore
                 other as Loading
 
                 if (searchQuery != other.searchQuery) return false
-                if (isActive != other.isActive) return false
+                if (isSearchActive != other.isSearchActive) return false
 
                 return true
             }
 
             override fun hashCode(): Int {
                 var result = searchQuery.hashCode()
-                result = 31 * result + isActive.hashCode()
+                result = 31 * result + isSearchActive.hashCode()
                 return result
             }
         }
 
-        class Error(override val searchQuery: String, val errorMessage: String, override val isActive: Boolean): State() {
+        class Error(override val searchQuery: String, val errorMessage: String, override val isSearchActive: Boolean): State() {
             override fun equals(other: Any?): Boolean {
                 if (this === other) return true
                 if (javaClass != other?.javaClass) return false
@@ -64,7 +78,7 @@ interface LocationSelectionStore
 
                 if (searchQuery != other.searchQuery) return false
                 if (errorMessage != other.errorMessage) return false
-                if (isActive != other.isActive) return false
+                if (isSearchActive != other.isSearchActive) return false
 
                 return true
             }
@@ -72,7 +86,7 @@ interface LocationSelectionStore
             override fun hashCode(): Int {
                 var result = searchQuery.hashCode()
                 result = 31 * result + errorMessage.hashCode()
-                result = 31 * result + isActive.hashCode()
+                result = 31 * result + isSearchActive.hashCode()
                 return result
             }
         }
@@ -80,7 +94,7 @@ interface LocationSelectionStore
         class FoundLocations(
             override val searchQuery: String,
             val locations: List<Location>,
-            override val isActive: Boolean
+            override val isSearchActive: Boolean
         ): State() {
             override fun equals(other: Any?): Boolean {
                 if (this === other) return true
@@ -90,7 +104,7 @@ interface LocationSelectionStore
 
                 if (searchQuery != other.searchQuery) return false
                 if (locations != other.locations) return false
-                if (isActive != other.isActive) return false
+                if (isSearchActive != other.isSearchActive) return false
 
                 return true
             }
@@ -98,7 +112,7 @@ interface LocationSelectionStore
             override fun hashCode(): Int {
                 var result = searchQuery.hashCode()
                 result = 31 * result + locations.hashCode()
-                result = 31 * result + isActive.hashCode()
+                result = 31 * result + isSearchActive.hashCode()
                 return result
             }
         }

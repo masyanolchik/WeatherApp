@@ -29,7 +29,10 @@ fun main() {
     }
 
     application {
-        Window(onCloseRequest = ::exitApplication) {
+        Window(
+            title = "Weather display app",
+            onCloseRequest = ::exitApplication,
+        ) {
             WeatherAppTheme {
                 MainView(locationSelectionComponent)
             }

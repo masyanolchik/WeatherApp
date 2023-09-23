@@ -29,6 +29,7 @@ kotlin {
     val koinVersion = "3.2.0"
     val mviKotlinVersion = "3.1.0"
     val kotlinDecomposeVersion = "1.0.0-compose-experimental"
+    val dateTimeVersion = "0.4.1"
 
     androidTarget()
     jvm("desktop")
@@ -85,6 +86,11 @@ kotlin {
                 implementation("com.arkivanov.decompose:decompose:$kotlinDecomposeVersion")
                 implementation("com.arkivanov.decompose:extensions-compose-jetbrains:$kotlinDecomposeVersion")
 
+                // Async Image Loader
+                implementation("io.github.qdsfdhvh:image-loader:1.2.10")
+
+                // Date Time library
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:$dateTimeVersion")
             }
         }
         val commonTest by getting {

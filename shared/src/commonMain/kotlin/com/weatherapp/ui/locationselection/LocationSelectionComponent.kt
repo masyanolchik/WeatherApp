@@ -44,9 +44,6 @@ class LocationSelectionComponent(
         locationSelectionStore
             .labels
             .flowOn(weatherAppDispatchers.main)
-            .onEach {
-                val k = 0
-            }
             .stateIn(coroutineScope, SharingStarted.Eagerly, LocationSelectionStore.Label.NoLocationChosen)
 
 

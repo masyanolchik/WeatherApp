@@ -5,7 +5,11 @@ import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
+import com.weatherapp.core.model.Forecast
 import com.weatherapp.core.model.Location
+import com.weatherapp.core.model.WeatherUnit
+import com.weatherapp.core.network.error.WeatherApiException
+import com.weatherapp.data.repository.forecast.ForecastRepository
 import com.weatherapp.data.repository.location.LocationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,39 +18,54 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.test.KoinTest
 import org.koin.test.inject
 import weatherAppDispatchers
 
-internal class LocationSelectionStoreFactory(private val storeFactory: StoreFactory): KoinTest {
+internal class LocationSelectionStoreFactory(private val storeFactory: StoreFactory) : KoinTest {
     private val locationRepository: LocationRepository by inject()
+    private val forecastRepository: ForecastRepository by inject()
 
     fun create(): LocationSelectionStore =
-        object: LocationSelectionStore, Store<LocationSelectionStore.Intent, LocationSelectionStore.State, LocationSelectionStore.Label> by storeFactory.create(
-            name = "LocationSelectionStore",
-            initialState = LocationSelectionStore.State.FoundLocations("", emptyList(), false),
-            bootstrapper = SimpleBootstrapper(Unit),
-            executorFactory = ::ExecutorImpl,
-            reducer = ReducerImpl
-        ) {}
+        object : LocationSelectionStore,
+            Store<LocationSelectionStore.Intent, LocationSelectionStore.State, LocationSelectionStore.Label> by storeFactory.create(
+                name = "LocationSelectionStore",
+                initialState = LocationSelectionStore.State.FoundLocations("", emptyList(), false),
+                bootstrapper = SimpleBootstrapper(Unit),
+                executorFactory = ::ExecutorImpl,
+                reducer = ReducerImpl
+            ) {}
 
     private sealed class Msg {
-        data class ListLoading(val query: String): Msg()
+        data class ListLoading(val query: String) : Msg()
 
-        data class SelectedLocation(val locationTitle: String): Msg()
+        data class SelectedLocation(
+            val locationTitle: String,
+            val isLoadingForecasts: Boolean = false,
+            val isErrorLoadingForecasts: Boolean = false,
+            val locationForecasts: List<Forecast> = emptyList()
+        ) : Msg()
 
-        data class Error(val errorMessage: String, val query: String): Msg()
+        data class Error(val errorMessage: String, val query: String) : Msg()
 
-        data class ListLoaded(val searchQuery: String, val locations: List<Location>): Msg()
+        data class ListLoaded(val searchQuery: String, val locations: List<Location>) : Msg()
     }
 
-    private inner class ExecutorImpl():
+    private inner class ExecutorImpl() :
         CoroutineExecutor<LocationSelectionStore.Intent,
                 Unit,
                 LocationSelectionStore.State,
@@ -56,9 +75,6 @@ internal class LocationSelectionStoreFactory(private val storeFactory: StoreFact
         private val queryFlow = MutableStateFlow("")
         private val queryProcessFlow = queryFlow
             .debounce(700)
-            .onEach {
-                dispatch(Msg.ListLoading(it))
-            }
             .filter { query ->
                 query.isNotEmpty()
             }
@@ -70,7 +86,7 @@ internal class LocationSelectionStoreFactory(private val storeFactory: StoreFact
                 it.onSuccess { list ->
                     dispatch(Msg.ListLoaded(queryFlow.value, list))
                 }.onFailure { _ ->
-                    dispatch(Msg.Error("Error loading locations",queryFlow.value))
+                    dispatch(Msg.Error("Error loading locations", queryFlow.value))
                 }
             }
             .shareIn(scope, SharingStarted.WhileSubscribed())
@@ -89,7 +105,12 @@ internal class LocationSelectionStoreFactory(private val storeFactory: StoreFact
                     }
                 }.onFailure {
                     currentLocationFlow.value?.let { location ->
-                        publish(LocationSelectionStore.Label.CurrentLocationChoosingError(location, "Failed to save the chosen location"))
+                        publish(
+                            LocationSelectionStore.Label.CurrentLocationChoosingError(
+                                location,
+                                "Failed to save the chosen location"
+                            )
+                        )
                     }
                 }
             }
@@ -106,10 +127,9 @@ internal class LocationSelectionStoreFactory(private val storeFactory: StoreFact
             scope.launch {
                 locationRepository.getSavedSelectedLocation()
                     .collectLatest {
-                         it.onSuccess { location ->
-                             publish(LocationSelectionStore.Label.CurrentLocationChosen(location))
-                             dispatch(Msg.SelectedLocation(location.toString()))
-                         }
+                        it.onSuccess { location ->
+                            publish(LocationSelectionStore.Label.CurrentLocationChosen(location))
+                        }
                     }
             }
         }
@@ -118,27 +138,104 @@ internal class LocationSelectionStoreFactory(private val storeFactory: StoreFact
             intent: LocationSelectionStore.Intent,
             getState: () -> LocationSelectionStore.State
         ) =
-            when(intent) {
+            when (intent) {
                 is LocationSelectionStore.Intent.ChoseCurrentLocation -> {
                     currentLocationFlow.update {
                         intent.location
                     }
                 }
+
                 is LocationSelectionStore.Intent.EnterSearchQueryIntent -> {
                     queryFlow.update {
                         intent.searchQuery
                     }
                 }
+
+                is LocationSelectionStore.Intent.ShowForecastsForLocation -> {
+                    dispatch(
+                        with(intent) {
+                            Msg.SelectedLocation(
+                                "${location.name}, ${location.state}${location.zip}, ${location.country}",
+                                isLoadingForecasts = true
+                            )
+                        }
+                    )
+                    scope.launch {
+                        forecastRepository
+                            .getForecastsForLocation(intent.location, WeatherUnit.METRIC)
+                            .flatMapLatest {
+                                if(it.isFailure) {
+                                    forecastRepository.getSavedForecastsForLocation(intent.location)
+                                } else {
+                                    flowOf(it)
+                                }
+                            }
+                            .collectLatest { result ->
+                                result.onSuccess { threeHourForecasts ->
+                                    val dailyForecasts = threeHourForecasts
+                                        .groupBy { it.getLocalDateTime().dayOfYear }
+                                        .filter {
+                                            it.value.size == 8 ||
+                                                    it.value.first()
+                                                        .getLocalDateTime().dayOfYear == Clock.System.now()
+                                                .toLocalDateTime(TimeZone.currentSystemDefault()).dayOfYear
+                                        }
+                                        .map {
+                                            val baseIndex = it.value.size / 2
+                                            it.value[baseIndex]
+                                        }
+                                    dispatch(
+                                        with(intent) {
+                                            Msg.SelectedLocation(
+                                                "${location.name}, ${location.state}${location.zip}, ${location.country}",
+                                                locationForecasts = dailyForecasts
+                                            )
+                                        }
+                                    )
+                                }.onFailure {
+                                    dispatch(
+                                        with(intent) {
+                                            Msg.SelectedLocation(
+                                                "${location.name}, ${location.state}${location.zip}, ${location.country}",
+                                                isErrorLoadingForecasts = true
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+                    }
+                    Unit
+                }
             }
     }
 
-    private object ReducerImpl: Reducer<LocationSelectionStore.State, Msg> {
+    private object ReducerImpl : Reducer<LocationSelectionStore.State, Msg> {
         override fun LocationSelectionStore.State.reduce(msg: Msg): LocationSelectionStore.State =
-            when(msg) {
-                is Msg.ListLoading -> LocationSelectionStore.State.Loading(msg.query, msg.query.isNotEmpty())
-                is Msg.Error -> LocationSelectionStore.State.Error(msg.query, msg.errorMessage, msg.query.isNotEmpty())
-                is Msg.ListLoaded -> LocationSelectionStore.State.FoundLocations(msg.searchQuery, msg.locations, true)
-                is Msg.SelectedLocation -> LocationSelectionStore.State.SelectedLocation(msg.locationTitle)
+            when (msg) {
+                is Msg.ListLoading -> LocationSelectionStore.State.Loading(
+                    msg.query,
+                    msg.query.isNotEmpty()
+                )
+
+                is Msg.Error -> LocationSelectionStore.State.Error(
+                    msg.query,
+                    msg.errorMessage,
+                    msg.query.isNotEmpty()
+                )
+
+                is Msg.ListLoaded -> LocationSelectionStore.State.FoundLocations(
+                    msg.searchQuery,
+                    msg.locations,
+                    true
+                )
+
+                is Msg.SelectedLocation ->
+                    LocationSelectionStore.State.SelectedLocation(
+                        msg.locationTitle,
+                        isLoadingForecasts = msg.isLoadingForecasts,
+                        isErrorLoadingForecasts = msg.isErrorLoadingForecasts,
+                        locationForecasts = msg.locationForecasts,
+                    )
             }
     }
 

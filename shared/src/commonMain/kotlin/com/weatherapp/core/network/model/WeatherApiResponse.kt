@@ -51,7 +51,7 @@ data class NetworkDateForecast(
     @SerialName("clouds") val cloudiness: Clouds,
     val wind: NetworkWindForecast,
     val visibility: Int,
-    val pop: Int,
+    val pop: Double,
 )
 
 @Serializable

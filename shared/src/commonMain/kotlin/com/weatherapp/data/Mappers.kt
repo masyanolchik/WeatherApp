@@ -50,8 +50,8 @@ fun WeatherApiResponse.toForecasts(location: Location) = buildList {
     addAll(list.map {
         Forecast(
             date = it.dt,
-            temperature = it.main.temp.toString(),
-            feelsLikeTemperature = it.main.feelsLike.toString(),
+            temperature = it.main.temp.toInt(),
+            feelsLikeTemperature = it.main.feelsLike.toInt(),
             humidityPercentage = it.main.humidity.toString(),
             weatherTitle = it.weather.first().main,
             weatherDescription = it.weather.first().description,
@@ -69,8 +69,8 @@ fun WeatherApiResponse.toForecasts(location: Location) = buildList {
 fun Forecast.toForecastEntity(locationEntity: LocationEntity) = ForecastEntity(
     id = 0,
     date = date,
-    temperature = temperature,
-    feelsLikeTemperature = feelsLikeTemperature,
+    temperature = temperature.toString(),
+    feelsLikeTemperature = feelsLikeTemperature.toString(),
     humidityPercentage = humidityPercentage,
     weatherTitle = weatherTitle,
     weatherDescription = weatherDescription,
@@ -85,8 +85,8 @@ fun Forecast.toForecastEntity(locationEntity: LocationEntity) = ForecastEntity(
 
 fun ForecastEntity.toForecast(location: Location) = Forecast(
     date = date,
-    temperature = temperature,
-    feelsLikeTemperature = feelsLikeTemperature,
+    temperature = temperature.toInt(),
+    feelsLikeTemperature = feelsLikeTemperature.toInt(),
     humidityPercentage = humidityPercentage,
     weatherTitle = weatherTitle,
     weatherDescription = weatherDescription,

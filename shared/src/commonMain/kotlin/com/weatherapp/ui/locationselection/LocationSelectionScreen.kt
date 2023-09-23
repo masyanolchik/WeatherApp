@@ -1,6 +1,5 @@
 package com.weatherapp.ui.locationselection
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import com.weatherapp.ui.locationselection.component.LocationForecastContent
 import com.weatherapp.ui.locationselection.component.LocationSelectionContent
 import com.weatherapp.ui.locationselection.store.LocationSelectionStore
-import com.weatherapp.ui.theme.ColorOnTertiaryContainer
 import kotlinx.coroutines.launch
 
 @Composable
@@ -36,6 +34,7 @@ fun LocationSelectionScreen(locationSelectionComponent: LocationSelectionCompone
         is LocationSelectionStore.Label.CurrentLocationChosen -> {
             val currentLocationChosenLabel = labelState as LocationSelectionStore.Label.CurrentLocationChosen
             scope.launch {
+                locationSelectionComponent.onEvent(LocationSelectionStore.Intent.ShowForecastsForLocation(currentLocationChosenLabel.location))
                 snackbarHostState
                     .showSnackbar(
                         message = "Location ${currentLocationChosenLabel.location.name} is chosen",
@@ -62,11 +61,16 @@ fun LocationSelectionScreen(locationSelectionComponent: LocationSelectionCompone
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
-                    .background(color = ColorOnTertiaryContainer)
                     .fillMaxSize()
-                    .padding(top = 200.dp)
+                    .padding(top = if(locationQuerySelectionState.isSearchActive) 200.dp else 80.dp)
             ) {
-                LocationForecastContent()
+                LocationForecastContent(
+                    state = locationQuerySelectionState,
+                    onEvent = locationSelectionComponent::onEvent,
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .fillMaxSize()
+                )
             }
             LocationSelectionContent(
                 state = locationQuerySelectionState,

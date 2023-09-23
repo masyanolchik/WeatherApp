@@ -21,11 +21,11 @@ class ForecastRepositoryImpl(
     override suspend fun getForecastsForLocation(location: Location, weatherUnit: WeatherUnit): Flow<Result<List<Forecast>>> {
         var result: Result<List<Forecast>>
         try {
-            forecastDao.clearTable()
             with(location) {
                 val forecasts = weatherApiClient
                     .getWeatherForecast(this, weatherUnit)
                     .toForecasts(this)
+                forecastDao.clearTable()
                 val locationEntity = locationDao.getLocationByLatitudeLongitude(
                     latitude,
                     longitude
@@ -36,7 +36,7 @@ class ForecastRepositoryImpl(
             }
             result = Result.success(
                 forecastDao.getAllForecasts()
-                    .map { it.first.toForecast(it.second.toLocation()) }
+                    .map { it.toForecast(location) }
             )
         } catch (ex: Exception) {
             result = Result.failure(ex)
@@ -45,21 +45,18 @@ class ForecastRepositoryImpl(
     }
 
     override suspend fun getSavedForecastsForLocation(location: Location): Flow<Result<List<Forecast>>> {
-        val result: Result<List<Forecast>> = try {
+        return try {
             val locationEntity = locationDao.getLocationByLatitudeLongitude(
                 location.latitude,
                 location.longitude
             )
-            Result.success(
-                forecastDao
-                    .getAllForecasts()
-                    .filter { it.second == locationEntity }
-                    .map { it.first }
-                    .map { it.toForecast(locationEntity.toLocation()) }
-            )
+            val forecasts = forecastDao
+                .getAllForecasts()
+                .filter { it.locationId == locationEntity.id }
+                .map { it.toForecast(locationEntity.toLocation()) }
+            flowOf(Result.success(forecasts))
         } catch (ex: Exception) {
-            Result.failure(ex)
+            flowOf(Result.failure(ex))
         }
-        return flowOf(result)
     }
 }
