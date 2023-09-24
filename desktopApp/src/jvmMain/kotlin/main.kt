@@ -27,11 +27,14 @@ import com.weatherapp.ui.forecast.ForecastScreen
 import com.weatherapp.ui.forecast.store.ForecastStore
 import com.weatherapp.ui.locationselection.LocationSelectionComponent
 import com.weatherapp.ui.theme.WeatherAppTheme
+import com.weatherapp.ui.weatherchangenotifier.WeatherChangeNotifier
 import javax.swing.SwingUtilities
 import kotlinx.datetime.LocalDateTime
 
 fun main() {
-    initKoin(enableNetworkLogs = false)
+    val koinApp = initKoin(enableNetworkLogs = false)
+
+    val weatherChangeNotifier: WeatherChangeNotifier = koinApp.koin.get()
 
     val locationSelectionComponent = invokeOnAwtSync {
         setMainThreadId(Thread.currentThread().id)
@@ -65,7 +68,6 @@ fun main() {
         val isOpen by rememberSaveable { mutableStateOf(true)}
         val trayState = rememberTrayState()
         val imageVector = rememberVectorPainter(Icons.Default.Thunderstorm)
-        val notification = rememberNotification("Notification", "Message from MyApp!", Notification.Type.Info)
 
         Tray(
             state = trayState,
@@ -77,6 +79,12 @@ fun main() {
                 )
             }
         )
+        weatherChangeNotifier.setOnWeatherChangedListener(object : WeatherChangeNotifier.Listener {
+            override fun onWeatherChanges(text: String) {
+                trayState.sendNotification(Notification("Weather display app", text, Notification.Type.Warning))
+            }
+
+        })
         if(isOpen) {
             var forecastOpened by rememberSaveable { mutableStateOf(false) }
             val openForecastWindow: (Location, LocalDateTime) -> Unit = { location, localDateTime ->
@@ -111,7 +119,6 @@ fun main() {
                         locationSelectionComponent,
                         openForecastWindow
                     )
-                    trayState.sendNotification(notification)
                 }
             }
         }

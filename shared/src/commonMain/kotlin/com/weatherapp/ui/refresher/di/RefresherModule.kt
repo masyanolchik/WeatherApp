@@ -1,9 +1,9 @@
-package com.weatherapp.refresher.di
+package com.weatherapp.ui.refresher.di
 
-import com.weatherapp.refresher.ForecastRefresher
-import com.weatherapp.refresher.ForecastRefresherImplementation
-import com.weatherapp.refresher.ticker.Ticker
-import com.weatherapp.refresher.ticker.TickerImplementation
+import com.weatherapp.ui.refresher.ForecastRefresher
+import com.weatherapp.ui.refresher.ForecastRefresherImplementation
+import com.weatherapp.ui.refresher.ticker.Ticker
+import com.weatherapp.ui.refresher.ticker.TickerImplementation
 import org.koin.dsl.binds
 import org.koin.dsl.module
 import weatherAppDispatchers

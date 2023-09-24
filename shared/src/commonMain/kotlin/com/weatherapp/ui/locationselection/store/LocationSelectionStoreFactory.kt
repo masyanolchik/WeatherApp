@@ -10,7 +10,7 @@ import com.weatherapp.core.model.Location
 import com.weatherapp.core.model.WeatherUnit
 import com.weatherapp.data.repository.forecast.ForecastRepository
 import com.weatherapp.data.repository.location.LocationRepository
-import com.weatherapp.refresher.ForecastRefresher
+import com.weatherapp.ui.refresher.ForecastRefresher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
