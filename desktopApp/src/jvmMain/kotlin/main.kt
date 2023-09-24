@@ -1,12 +1,20 @@
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Thunderstorm
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.window.Notification
+import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberNotification
+import androidx.compose.ui.window.rememberTrayState
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.essenty.lifecycle.resume
@@ -54,40 +62,60 @@ fun main() {
     }
 
     application {
+        val isOpen by rememberSaveable { mutableStateOf(true)}
+        val trayState = rememberTrayState()
+        val imageVector = rememberVectorPainter(Icons.Default.Thunderstorm)
+        val notification = rememberNotification("Notification", "Message from MyApp!", Notification.Type.Info)
 
-        var forecastOpened by rememberSaveable { mutableStateOf(false) }
-        val openForecastWindow: (Location, LocalDateTime) -> Unit = { location, localDateTime ->
-            forecastOpened = true
-            forecastComponent.onEvent(ForecastStore.Intent.ShowForecastForLocationForDay(location, localDateTime))
-        }
-        WeatherAppTheme {
-            Window(
-                title = "Forecast for a day",
-                visible =  forecastOpened,
-                onCloseRequest = {
-                   forecastOpened = false
-                },
-                state = WindowState(
-                    position = WindowPosition.Aligned(Alignment.Center)
+        Tray(
+            state = trayState,
+            icon = imageVector,
+            menu = {
+                Item(
+                    "Exit",
+                    onClick = { exitApplication() }
                 )
-            ) {
-                ForecastScreen(
-                    forecastComponent = forecastComponent,
-                    onCloseClick = {
+            }
+        )
+        if(isOpen) {
+            var forecastOpened by rememberSaveable { mutableStateOf(false) }
+            val openForecastWindow: (Location, LocalDateTime) -> Unit = { location, localDateTime ->
+                forecastOpened = true
+                forecastComponent.onEvent(ForecastStore.Intent.ShowForecastForLocationForDay(location, localDateTime))
+            }
+            WeatherAppTheme {
+                Window(
+                    icon = imageVector,
+                    title = "Forecast for a day",
+                    visible =  forecastOpened,
+                    onCloseRequest = {
                         forecastOpened = false
-                    }
-                )
-            }
-            Window(
-                title = "Weather display app",
-                onCloseRequest = ::exitApplication,
-            ) {
-                MainView(
-                    locationSelectionComponent,
-                    openForecastWindow
-                )
+                    },
+                    state = WindowState(
+                        position = WindowPosition.Aligned(Alignment.Center)
+                    )
+                ) {
+                    ForecastScreen(
+                        forecastComponent = forecastComponent,
+                        onCloseClick = {
+                            forecastOpened = false
+                        }
+                    )
+                }
+                Window(
+                    icon = imageVector,
+                    title = "Weather display app",
+                    onCloseRequest = ::exitApplication,
+                ) {
+                    MainView(
+                        locationSelectionComponent,
+                        openForecastWindow
+                    )
+                    trayState.sendNotification(notification)
+                }
             }
         }
+
     }
 }
 
