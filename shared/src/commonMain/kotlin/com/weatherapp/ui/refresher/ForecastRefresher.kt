@@ -1,4 +1,4 @@
-package com.weatherapp.refresher
+package com.weatherapp.ui.refresher
 
 import com.weatherapp.core.model.Forecast
 import com.weatherapp.core.model.Location

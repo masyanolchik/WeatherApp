@@ -1,9 +1,9 @@
-package com.weatherapp.refresher
+package com.weatherapp.ui.refresher
 
 import com.weatherapp.core.model.Location
 import com.weatherapp.core.model.WeatherUnit
 import com.weatherapp.data.repository.forecast.ForecastRepository
-import com.weatherapp.refresher.ticker.Ticker
+import com.weatherapp.ui.refresher.ticker.Ticker
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,6 +59,6 @@ class ForecastRefresherImplementation(
     }
 
     companion object {
-        private const val TICKER_DELAY = 900_000L
+        private const val TICKER_DELAY = 10_000L
     }
 }

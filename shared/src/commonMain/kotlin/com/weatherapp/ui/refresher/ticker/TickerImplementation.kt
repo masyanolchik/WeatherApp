@@ -1,4 +1,4 @@
-package com.weatherapp.refresher.ticker
+package com.weatherapp.ui.refresher.ticker
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
