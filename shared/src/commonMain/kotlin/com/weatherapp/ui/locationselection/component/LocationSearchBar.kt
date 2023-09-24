@@ -45,8 +45,7 @@ fun LocationSearchBar(
     Box(modifier.semantics { isTraversalGroup = true }) {
         SearchBar(
             modifier = Modifier
-                .align(Alignment.TopCenter)
-                .wrapContentHeight(),
+                .align(Alignment.TopCenter),
             query = text,
             onQueryChange = {
                 text = it

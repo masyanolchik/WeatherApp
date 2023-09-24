@@ -10,6 +10,7 @@ import com.weatherapp.core.model.Location
 import com.weatherapp.core.model.WeatherUnit
 import com.weatherapp.data.repository.forecast.ForecastRepository
 import com.weatherapp.data.repository.location.LocationRepository
+import com.weatherapp.refresher.ForecastRefresher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
@@ -35,6 +36,7 @@ import kotlin.math.max
 internal class LocationSelectionStoreFactory(private val storeFactory: StoreFactory) : KoinComponent {
     private val locationRepository: LocationRepository by inject()
     private val forecastRepository: ForecastRepository by inject()
+    private val refresher: ForecastRefresher by inject()
 
     fun create(): LocationSelectionStore =
         object : LocationSelectionStore,
@@ -68,6 +70,8 @@ internal class LocationSelectionStoreFactory(private val storeFactory: StoreFact
                 Msg,
                 LocationSelectionStore.Label>
             (weatherAppDispatchers.main) {
+        private var refresherListener: ForecastRefresher.Listener? = null
+
         private val queryFlow = MutableStateFlow("")
         private val queryProcessFlow = queryFlow
             .debounce(700)
@@ -148,15 +152,53 @@ internal class LocationSelectionStoreFactory(private val storeFactory: StoreFact
                 }
 
                 is LocationSelectionStore.Intent.ShowForecastsForLocation -> {
-                    dispatch(
-                        with(intent) {
-                            Msg.SelectedLocation(
-                                "${location.name}, ${location.state}${location.zip}, ${location.country}",
-                                isLoadingForecasts = true
+                    refresherListener?.let {
+                        refresher.removeListener(it)
+                    }
+                    refresherListener = object : ForecastRefresher.Listener {
+                        override fun onRefreshStarted(location: Location) {
+                            dispatch(
+                                Msg.SelectedLocation(
+                                    "${location.name}, ${location.state}${location.zip}, ${location.country}",
+                                    isLoadingForecasts = true
+                                )
                             )
                         }
-                    )
-                    scope.launch {
+
+                        override fun onRefreshFinished(result: Result<List<Forecast>>) {
+                            result.onSuccess { threeHourForecasts ->
+                                dispatchForecast(intent.location, threeHourForecasts)
+                            }.onFailure { _ ->
+                                scope.launch {
+                                    forecastRepository.getSavedForecastsForLocation(intent.location)
+                                        .collectLatest { resultSaved ->
+                                            resultSaved.onSuccess { threeHourForecast ->
+                                                dispatchForecast(intent.location, threeHourForecast)
+                                            }.onFailure {
+                                                dispatch(
+                                                    with(intent) {
+                                                        Msg.SelectedLocation(
+                                                            "${location.name}, ${location.state}${location.zip}, ${location.country}",
+                                                            isErrorLoadingForecasts = true
+                                                        )
+                                                    }
+                                                )
+                                            }
+                                        }
+                                }
+                            }
+                        }
+
+                    }
+                    refresherListener?.let {
+                        refresher.addListener(it)
+                    }
+                    if(refresher.isRefresherStarted()) {
+                        refresher.forceRefresh(intent.location)
+                    } else {
+                        refresher.startBackgroundRefresher(intent.location)
+                    }
+                    /*scope.launch {
                         forecastRepository
                             .getForecastsForLocation(intent.location, WeatherUnit.METRIC)
                             .flatMapLatest {
@@ -204,10 +246,35 @@ internal class LocationSelectionStoreFactory(private val storeFactory: StoreFact
                                     )
                                 }
                             }
-                    }
-                    Unit
+                    }*/
                 }
             }
+
+        fun dispatchForecast(location: Location, threeHourForecasts: List<Forecast>) {
+            val dailyForecasts = threeHourForecasts
+                .groupBy { it.getLocalDateTime().dayOfYear }
+                .filter {
+                    it.value.size == 8 ||
+                            it.value.first()
+                                .getLocalDateTime().dayOfYear == Clock.System.now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault()).dayOfYear
+                }
+                .map { mapEntry ->
+                    val baseIndex = mapEntry.value.size / 2
+                    val minTemperature = mapEntry.value.minBy { it.temperatureMin }.temperatureMin
+                    val maxTemperature = mapEntry.value.maxBy { it.temperatureMax }.temperatureMin
+                    mapEntry.value[baseIndex].copy(
+                        temperatureMin = minTemperature,
+                        temperatureMax = maxTemperature
+                    )
+                }
+            dispatch(
+                    Msg.SelectedLocation(
+                        "${location.name}, ${location.state}${location.zip}, ${location.country}",
+                        locationForecasts = dailyForecasts
+                    )
+            )
+        }
     }
 
     private object ReducerImpl : Reducer<LocationSelectionStore.State, Msg> {

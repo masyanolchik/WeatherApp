@@ -3,6 +3,7 @@ package com.weatherapp.core.di
 import com.weatherapp.core.database.di.databaseModule
 import com.weatherapp.core.network.di.networkModule
 import com.weatherapp.data.di.dataModule
+import com.weatherapp.refresher.di.refresherModule
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 
@@ -12,6 +13,7 @@ fun initKoin(enableNetworkLogs: Boolean = false, appDeclaration: KoinAppDeclarat
         modules(
             databaseModule,
             networkModule(enableNetworkLogs),
+            refresherModule,
             dataModule
         )
     }
