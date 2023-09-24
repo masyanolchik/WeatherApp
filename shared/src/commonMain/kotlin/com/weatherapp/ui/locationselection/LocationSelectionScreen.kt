@@ -18,13 +18,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.weatherapp.core.model.Location
 import com.weatherapp.ui.locationselection.component.LocationForecastContent
 import com.weatherapp.ui.locationselection.component.LocationSelectionContent
 import com.weatherapp.ui.locationselection.store.LocationSelectionStore
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
 
 @Composable
-fun LocationSelectionScreen(locationSelectionComponent: LocationSelectionComponent) {
+fun LocationSelectionScreen(
+    locationSelectionComponent: LocationSelectionComponent,
+    onForecastForLocationClicked: (Location, LocalDateTime) -> Unit
+) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val locationQuerySelectionState by locationSelectionComponent.state.collectAsState()
@@ -66,7 +71,7 @@ fun LocationSelectionScreen(locationSelectionComponent: LocationSelectionCompone
             ) {
                 LocationForecastContent(
                     state = locationQuerySelectionState,
-                    onEvent = locationSelectionComponent::onEvent,
+                    onItemClicked = onForecastForLocationClicked,
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
                         .fillMaxSize()

@@ -12,6 +12,8 @@ import java.util.Locale
 data class Forecast(
     val date: Long,
     val temperature: Int,
+    val temperatureMin: Int,
+    val temperatureMax: Int,
     val feelsLikeTemperature: Int,
     val humidityPercentage: String,
     val weatherTitle: String,

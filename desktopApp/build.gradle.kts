@@ -10,6 +10,7 @@ kotlin {
     val koinVersion = "3.2.0"
     val kotlinDecomposeVersion = "1.0.0-compose-experimental"
     val mviKotlinVersion = "3.1.0"
+    val dateTimeVersion = "0.4.1"
 
     sourceSets {
         val jvmMain by getting  {
@@ -26,6 +27,9 @@ kotlin {
                 implementation("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
                 implementation("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
                 implementation("com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines:$mviKotlinVersion")
+
+                // Kotlin Date Library
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:$dateTimeVersion")
             }
         }
     }

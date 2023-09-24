@@ -8,7 +8,6 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutor
 import com.weatherapp.core.model.Forecast
 import com.weatherapp.core.model.Location
 import com.weatherapp.core.model.WeatherUnit
-import com.weatherapp.core.network.error.WeatherApiException
 import com.weatherapp.data.repository.forecast.ForecastRepository
 import com.weatherapp.data.repository.location.LocationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,25 +17,22 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.koin.test.KoinTest
-import org.koin.test.inject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import weatherAppDispatchers
+import kotlin.math.max
 
-internal class LocationSelectionStoreFactory(private val storeFactory: StoreFactory) : KoinTest {
+internal class LocationSelectionStoreFactory(private val storeFactory: StoreFactory) : KoinComponent {
     private val locationRepository: LocationRepository by inject()
     private val forecastRepository: ForecastRepository by inject()
 
@@ -180,9 +176,14 @@ internal class LocationSelectionStoreFactory(private val storeFactory: StoreFact
                                                         .getLocalDateTime().dayOfYear == Clock.System.now()
                                                 .toLocalDateTime(TimeZone.currentSystemDefault()).dayOfYear
                                         }
-                                        .map {
-                                            val baseIndex = it.value.size / 2
-                                            it.value[baseIndex]
+                                        .map { mapEntry ->
+                                            val baseIndex = mapEntry.value.size / 2
+                                            val minTemperature = mapEntry.value.minBy { it.temperatureMin }.temperatureMin
+                                            val maxTemperature = mapEntry.value.maxBy { it.temperatureMax }.temperatureMin
+                                            mapEntry.value[baseIndex].copy(
+                                                temperatureMin = minTemperature,
+                                                temperatureMax = maxTemperature
+                                            )
                                         }
                                     dispatch(
                                         with(intent) {
