@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS settingsEntity(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tempDifference INTEGER DEFAULT 0,
+    weatherUnit INTEGER DEFAULT 0
+);
+
+INSERT INTO settingsEntity(id, tempDifference, weatherUnit) VALUES(1,0,0);
+
+getAll:
+SELECT * FROM settingsEntity;
+
+insert:
+INSERT OR REPLACE INTO settingsEntity(id, tempDifference, weatherUnit)
+VALUES ?;
+
+update:
+UPDATE settingsEntity SET
+        tempDifference = :tempDifference,
+        weatherUnit = :weatherUnit
+        WHERE id = :id;
