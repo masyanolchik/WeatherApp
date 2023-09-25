@@ -1,3 +1,7 @@
+## THIS PROJECT IS BASED ON JETBRAINS COMPOSE MULTIPLATFORM APP
+## READ THE GUIDE BELOW IN ORDER TO BUILD IT ON YOUR MACHINE
+## ONLY DESKTOP APP IS FULLY FUNCTIONAL
+
 [![official project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 # [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform) application
