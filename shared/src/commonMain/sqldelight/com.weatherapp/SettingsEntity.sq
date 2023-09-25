@@ -4,8 +4,6 @@ CREATE TABLE IF NOT EXISTS settingsEntity(
     weatherUnit INTEGER DEFAULT 0
 );
 
-INSERT INTO settingsEntity(id, tempDifference, weatherUnit) VALUES(1,0,0);
-
 getAll:
 SELECT * FROM settingsEntity;
 

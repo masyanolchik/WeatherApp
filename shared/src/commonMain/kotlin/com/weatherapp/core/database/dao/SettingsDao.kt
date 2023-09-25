@@ -15,7 +15,7 @@ class SettingsDao(
     }
 
     suspend fun getSettingsEntity() = withContext(weatherAppDispatchers.io) {
-        query.getAll().executeAsList().first()
+        query.getAll().executeAsList()
     }
 
     suspend fun update(settingsEntity: SettingsEntity) = withContext(weatherAppDispatchers.io) {

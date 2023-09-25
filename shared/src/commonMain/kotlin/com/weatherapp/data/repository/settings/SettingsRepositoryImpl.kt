@@ -12,7 +12,12 @@ class SettingsRepositoryImpl(
 ): SettingsRepository {
     override suspend fun getSettings(): Flow<Result<Settings>> {
         return try {
-            flowOf(Result.success(settingsDao.getSettingsEntity().toSettings()))
+            var settingsList = settingsDao.getSettingsEntity()
+            if(settingsList.isEmpty()) {
+                settingsDao.insert(Settings().toSettingsEntity())
+                settingsList = settingsDao.getSettingsEntity()
+            }
+            flowOf(Result.success(settingsList.first().toSettings()))
         } catch (ex: Exception) {
             flowOf(Result.failure(ex))
         }
