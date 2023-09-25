@@ -10,7 +10,7 @@ import org.koin.dsl.binds
 import org.koin.dsl.module
 
 val dataModule = module {
-    single { SettingsRepositoryImpl(get()) }
+    single { SettingsRepositoryImpl(get()) } binds arrayOf(SettingsRepository::class)
     single{ LocationRepositoryImpl(get(), get()) } binds arrayOf(LocationRepository::class)
     single{ ForecastRepositoryImpl(get(),get(),get()) } binds arrayOf(ForecastRepository::class)
 }

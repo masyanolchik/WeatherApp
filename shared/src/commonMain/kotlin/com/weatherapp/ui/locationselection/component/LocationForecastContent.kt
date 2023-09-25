@@ -6,18 +6,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,29 +25,32 @@ import androidx.compose.ui.unit.dp
 import com.weatherapp.core.model.Forecast
 import com.weatherapp.core.model.Location
 import com.weatherapp.ui.AsyncImage
+import com.weatherapp.ui.forecast.component.getDegreesString
 import com.weatherapp.ui.locationselection.store.LocationSelectionStore
+import com.weatherapp.ui.settings.store.SettingsStore
 import com.weatherapp.ui.theme.ColorSurface
 import kotlinx.datetime.LocalDateTime
-import kotlin.reflect.KFunction1
 
 @Composable
 fun LocationForecastContent(
-    state: LocationSelectionStore.State,
+    locationSelectionState: LocationSelectionStore.State,
+    settingsState: SettingsStore.State,
     modifier: Modifier = Modifier,
     onItemClicked: (Location, LocalDateTime) -> Unit
 ) {
     Surface(color = ColorSurface) {
-        if(state is LocationSelectionStore.State.SelectedLocation) {
+        if(locationSelectionState is LocationSelectionStore.State.SelectedLocation) {
             when {
-                state.isLoadingForecasts -> {
+                locationSelectionState.isLoadingForecasts -> {
                     LocationForecastProgressBar(modifier.fillMaxSize())
                 }
-                state.isErrorLoadingForecasts -> {
+                locationSelectionState.isErrorLoadingForecasts -> {
                     LocationForecastError(modifier.fillMaxSize())
                 }
-                state.locationForecasts.isNotEmpty() -> {
+                locationSelectionState.locationForecasts.isNotEmpty() -> {
                     LocationForecastList(
-                        list = state.locationForecasts,
+                        settingsState = settingsState,
+                        list = locationSelectionState.locationForecasts,
                         onItemClicked = onItemClicked,
                         modifier = modifier.fillMaxSize()
                     )
@@ -89,10 +89,12 @@ fun LocationForecastError(
 
 @Composable
 fun LocationForecastList(
+    settingsState: SettingsStore.State,
     list: List<Forecast> = emptyList(),
     onItemClicked: (Location, LocalDateTime) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
+    val degreesString = getDegreesString(settingsState)
     LazyColumn(modifier) {
         items(list) {
             ListItem(
@@ -111,14 +113,14 @@ fun LocationForecastList(
                 },
                 trailingContent = {
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("${it.temperature}C")
+                        Text("${it.temperature}$degreesString")
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
-                                text = "${it.temperatureMin}C",
+                                text = "${it.temperatureMin}$degreesString",
                                 fontWeight = FontWeight.Thin
                             )
                             Text(
-                                text = "${it.temperatureMax}C",
+                                text = "${it.temperatureMax}$degreesString",
                                 fontWeight = FontWeight.Bold
                             )
                         }

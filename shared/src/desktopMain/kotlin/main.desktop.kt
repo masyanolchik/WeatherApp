@@ -3,15 +3,17 @@ import androidx.compose.runtime.Composable
 import com.weatherapp.core.model.Location
 import com.weatherapp.ui.locationselection.LocationSelectionComponent
 import com.weatherapp.ui.locationselection.LocationSelectionScreen
+import com.weatherapp.ui.settings.SettingsComponent
 import kotlinx.datetime.LocalDateTime
 
 actual fun getPlatformName(): String = "Desktop"
 
 @Composable
 fun MainView(
-    component: LocationSelectionComponent,
+    settingsComponent: SettingsComponent,
+    locationComponent: LocationSelectionComponent,
     onForecastForLocationClicked: (Location, LocalDateTime) -> Unit,
-) = LocationSelectionScreen(component, onForecastForLocationClicked)
+) = LocationSelectionScreen(settingsComponent, locationComponent, onForecastForLocationClicked)
 
 @Preview
 @Composable

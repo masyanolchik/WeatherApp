@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
     suspend fun getSettings(): Flow<Result<Settings>>
-    suspend fun updateSettings(settings: Settings): Flow<Result<Unit>>
+    suspend fun updateSettings(settings: Settings): Flow<Result<Settings>>
 }

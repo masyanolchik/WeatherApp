@@ -26,20 +26,21 @@ import com.weatherapp.ui.forecast.ForecastComponent
 import com.weatherapp.ui.forecast.ForecastScreen
 import com.weatherapp.ui.forecast.store.ForecastStore
 import com.weatherapp.ui.locationselection.LocationSelectionComponent
+import com.weatherapp.ui.settings.SettingsComponent
 import com.weatherapp.ui.theme.WeatherAppTheme
 import com.weatherapp.ui.weatherchangenotifier.WeatherChangeNotifier
 import javax.swing.SwingUtilities
 import kotlinx.datetime.LocalDateTime
 
 fun main() {
-    val koinApp = initKoin(enableNetworkLogs = false)
+    val lifecycle = LifecycleRegistry()
+    val koinApp = initKoin(DefaultComponentContext(lifecycle = lifecycle),DefaultStoreFactory(), enableNetworkLogs = false)
 
+    val settingsComponent: SettingsComponent = koinApp.koin.get()
     val weatherChangeNotifier: WeatherChangeNotifier = koinApp.koin.get()
 
     val locationSelectionComponent = invokeOnAwtSync {
         setMainThreadId(Thread.currentThread().id)
-
-        val lifecycle = LifecycleRegistry()
 
         val locationComponent = LocationSelectionComponent(
             componentContext = DefaultComponentContext(lifecycle = lifecycle),
@@ -52,8 +53,6 @@ fun main() {
     }
 
     val forecastComponent = invokeOnAwtSync {
-        val lifecycle = LifecycleRegistry()
-
         val frcComponent = ForecastComponent(
             componentContext = DefaultComponentContext(lifecycle = lifecycle),
             storeFactory = DefaultStoreFactory(),
@@ -104,6 +103,7 @@ fun main() {
                     )
                 ) {
                     ForecastScreen(
+                        settingsComponent,
                         forecastComponent = forecastComponent,
                         onCloseClick = {
                             forecastOpened = false
@@ -116,6 +116,7 @@ fun main() {
                     onCloseRequest = ::exitApplication,
                 ) {
                     MainView(
+                        settingsComponent,
                         locationSelectionComponent,
                         openForecastWindow
                     )

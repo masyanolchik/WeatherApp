@@ -14,6 +14,7 @@ val refresherModule = module {
         ForecastRefresherImplementation(
             weatherAppDispatchers.main,
             get(),
+            get(),
             get()
         )
     } binds arrayOf(ForecastRefresher::class)

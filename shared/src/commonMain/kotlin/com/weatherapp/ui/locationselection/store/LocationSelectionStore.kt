@@ -3,6 +3,7 @@ package com.weatherapp.ui.locationselection.store
 import com.arkivanov.mvikotlin.core.store.Store
 import com.weatherapp.core.model.Forecast
 import com.weatherapp.core.model.Location
+import com.weatherapp.core.model.WeatherUnit
 
 interface LocationSelectionStore
     : Store<LocationSelectionStore.Intent, LocationSelectionStore.State, LocationSelectionStore.Label> {

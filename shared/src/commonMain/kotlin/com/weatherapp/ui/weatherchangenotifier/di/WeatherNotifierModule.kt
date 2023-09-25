@@ -6,5 +6,5 @@ import org.koin.dsl.binds
 import org.koin.dsl.module
 
 val weatherNotifierModule = module {
-    single { WeatherChangeNotifierImplementation(get()) } binds arrayOf(WeatherChangeNotifier::class)
+    single { WeatherChangeNotifierImplementation(get(), get()) } binds arrayOf(WeatherChangeNotifier::class)
 }

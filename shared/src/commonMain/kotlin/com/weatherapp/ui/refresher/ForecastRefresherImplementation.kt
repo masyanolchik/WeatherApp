@@ -4,6 +4,7 @@ import com.weatherapp.core.model.Location
 import com.weatherapp.core.model.WeatherUnit
 import com.weatherapp.data.repository.forecast.ForecastRepository
 import com.weatherapp.ui.refresher.ticker.Ticker
+import com.weatherapp.ui.settings.SettingsComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,8 @@ import kotlinx.coroutines.flow.update
 class ForecastRefresherImplementation(
     private val coroutineDispatcher: CoroutineDispatcher,
     private val forecastRepository: ForecastRepository,
-    private val ticker: Ticker
+    private val ticker: Ticker,
+    private val settingsComponent: SettingsComponent
 ): ForecastRefresher {
     private val coroutineScope = CoroutineScope(coroutineDispatcher)
     private val listeners = mutableListOf<ForecastRefresher.Listener>()
@@ -28,7 +30,7 @@ class ForecastRefresherImplementation(
                 locationState.filterNotNull()
             }.flatMapLatest { location ->
                 listeners.forEach { it.onRefreshStarted(location) }
-                forecastRepository.getForecastsForLocation(location, WeatherUnit.METRIC)
+                forecastRepository.getForecastsForLocation(location, settingsComponent.state.value.currentWeatherUnit)
             }.onEach { forecasts ->
                 listeners.forEach { it.onRefreshFinished(forecasts) }
             }.shareIn(coroutineScope, SharingStarted.Eagerly)

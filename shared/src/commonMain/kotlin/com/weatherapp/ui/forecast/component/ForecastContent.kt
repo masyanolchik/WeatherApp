@@ -11,14 +11,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Colors
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,7 +33,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.weatherapp.core.model.Forecast
 import com.weatherapp.core.model.Location
+import com.weatherapp.core.model.Settings
 import com.weatherapp.ui.forecast.store.ForecastStore
+import com.weatherapp.ui.settings.store.SettingsStore
 import com.weatherapp.ui.theme.ColorOnPrimaryContainer
 import com.weatherapp.ui.theme.ColorOnSecondary
 import com.weatherapp.ui.theme.ColorPrimaryContainer
@@ -46,8 +45,9 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForecastContent(
-    state: ForecastStore.State,
+fun  ForecastContent(
+    forecastState: ForecastStore.State,
+    settingsState: SettingsStore.State,
     onCloseClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -56,8 +56,8 @@ fun ForecastContent(
             TopAppBar(
                 title = {
                     Text(
-                        text = "${state.dateTime.dayOfMonth} ${
-                            state.dateTime.dayOfWeek.getDisplayName(
+                        text = "${forecastState.dateTime.dayOfMonth} ${
+                            forecastState.dateTime.dayOfWeek.getDisplayName(
                                 TextStyle.FULL,
                                 Locale.getDefault()
                             )
@@ -83,8 +83,8 @@ fun ForecastContent(
             modifier = modifier.fillMaxSize().padding(it)
         ) {
             when {
-                state.forecasts.isNotEmpty() -> ShowForecastForDay(state.forecasts.first().location,state.forecasts)
-                state.isLoading ->  CircularProgressIndicator(modifier = modifier.align(CenterHorizontally))
+                forecastState.forecasts.isNotEmpty() -> ShowForecastForDay(settingsState,forecastState.forecasts.first().location,forecastState.forecasts)
+                forecastState.isLoading ->  CircularProgressIndicator(modifier = modifier.align(CenterHorizontally))
                 else -> ForecastError(modifier.fillMaxSize())
             }
         }
@@ -105,6 +105,7 @@ fun ForecastError(modifier: Modifier = Modifier) {
 
 @Composable
 fun ShowForecastForDay(
+    settingsState: SettingsStore.State,
     location: Location,
     forecasts: List<Forecast> = emptyList(),
     modifier: Modifier = Modifier
@@ -153,6 +154,7 @@ fun ShowForecastForDay(
         if(selectedHour != null) {
             val selectedForecast = forecasts.first { it.getLocalDateTime().hour == selectedHour }
             ForecastHourSection(
+                settingsState = settingsState,
                 forecast = selectedForecast,
                 modifier = Modifier.fillMaxSize()
             )

@@ -12,13 +12,18 @@ import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.weatherapp.core.model.Forecast
+import com.weatherapp.core.model.Settings
+import com.weatherapp.core.model.WeatherUnit
 import com.weatherapp.ui.AsyncImage
+import com.weatherapp.ui.settings.store.SettingsStore
 
 @Composable
 fun ForecastHourSection(
+    settingsState: SettingsStore.State,
     forecast: Forecast,
     modifier: Modifier = Modifier,
 ) {
+    val degreesString = getDegreesString(settingsState)
     Column(modifier = modifier.padding(8.dp)) {
         Row {
             Column(Modifier.weight(1f).fillMaxWidth()) {
@@ -29,11 +34,11 @@ fun ForecastHourSection(
                     text = forecast.weatherDescription
                 )
                 Text(
-                    text = "${forecast.temperature}C",
+                    text = "${forecast.temperature}$degreesString",
                     style = MaterialTheme.typography.headlineSmall,
                 )
                 Text(
-                    text = "Feels like ${forecast.feelsLikeTemperature}C"
+                    text = "Feels like ${forecast.feelsLikeTemperature}$degreesString"
                 )
                 Text(
                     text = "Humidity: ${forecast.humidityPercentage}%"
@@ -64,3 +69,5 @@ fun ForecastHourSection(
         }
     }
 }
+
+fun getDegreesString(settingsState: SettingsStore.State) = if(settingsState.currentWeatherUnit == WeatherUnit.METRIC) "C" else "F"

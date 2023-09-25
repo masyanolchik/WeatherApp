@@ -198,55 +198,6 @@ internal class LocationSelectionStoreFactory(private val storeFactory: StoreFact
                     } else {
                         refresher.startBackgroundRefresher(intent.location)
                     }
-                    /*scope.launch {
-                        forecastRepository
-                            .getForecastsForLocation(intent.location, WeatherUnit.METRIC)
-                            .flatMapLatest {
-                                if(it.isFailure) {
-                                    forecastRepository.getSavedForecastsForLocation(intent.location)
-                                } else {
-                                    flowOf(it)
-                                }
-                            }
-                            .collectLatest { result ->
-                                result.onSuccess { threeHourForecasts ->
-                                    val dailyForecasts = threeHourForecasts
-                                        .groupBy { it.getLocalDateTime().dayOfYear }
-                                        .filter {
-                                            it.value.size == 8 ||
-                                                    it.value.first()
-                                                        .getLocalDateTime().dayOfYear == Clock.System.now()
-                                                .toLocalDateTime(TimeZone.currentSystemDefault()).dayOfYear
-                                        }
-                                        .map { mapEntry ->
-                                            val baseIndex = mapEntry.value.size / 2
-                                            val minTemperature = mapEntry.value.minBy { it.temperatureMin }.temperatureMin
-                                            val maxTemperature = mapEntry.value.maxBy { it.temperatureMax }.temperatureMin
-                                            mapEntry.value[baseIndex].copy(
-                                                temperatureMin = minTemperature,
-                                                temperatureMax = maxTemperature
-                                            )
-                                        }
-                                    dispatch(
-                                        with(intent) {
-                                            Msg.SelectedLocation(
-                                                "${location.name}, ${location.state}${location.zip}, ${location.country}",
-                                                locationForecasts = dailyForecasts
-                                            )
-                                        }
-                                    )
-                                }.onFailure {
-                                    dispatch(
-                                        with(intent) {
-                                            Msg.SelectedLocation(
-                                                "${location.name}, ${location.state}${location.zip}, ${location.country}",
-                                                isErrorLoadingForecasts = true
-                                            )
-                                        }
-                                    )
-                                }
-                            }
-                    }*/
                 }
             }
 
