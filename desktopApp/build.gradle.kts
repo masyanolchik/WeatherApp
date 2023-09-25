@@ -6,7 +6,10 @@ plugins {
 }
 
 kotlin {
-    jvm()
+    jvm {
+        jvmToolchain(11)
+        withJava()
+    }
     val koinVersion = "3.2.0"
     val kotlinDecomposeVersion = "1.0.0-compose-experimental"
     val mviKotlinVersion = "3.1.0"
@@ -15,6 +18,8 @@ kotlin {
     sourceSets {
         val jvmMain by getting  {
             dependencies {
+                implementation(project(":shared"))
+
                 // Koin
                 implementation("io.insert-koin:koin-core:$koinVersion")
                 implementation("io.insert-koin:koin-test:$koinVersion")

@@ -135,6 +135,7 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(compose.desktop.common)
+                implementation("org.apache.httpcomponents:httpclient:4.5.14")
                 implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:$coroutinesVersion")
 

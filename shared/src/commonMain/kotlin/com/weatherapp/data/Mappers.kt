@@ -2,11 +2,14 @@ package com.weatherapp.data
 
 import com.weatherapp.core.model.Forecast
 import com.weatherapp.core.model.Location
+import com.weatherapp.core.model.Settings
+import com.weatherapp.core.model.WeatherUnit
 import com.weatherapp.core.network.model.LocationQueryApiResponse
 import com.weatherapp.core.network.model.LocationZipApiResponse
 import com.weatherapp.core.network.model.WeatherApiResponse
 import comweatherapp.ForecastEntity
 import comweatherapp.LocationEntity
+import comweatherapp.SettingsEntity
 
 fun LocationQueryApiResponse.toLocation() = Location(
     name = name,
@@ -104,3 +107,16 @@ fun ForecastEntity.toForecast(location: Location) = Forecast(
     visibilityMeters = visibilityMeters.toInt(),
     location = location
 )
+
+fun Settings.toSettingsEntity() =
+    SettingsEntity(
+        id = 1,
+        tempDifference = tempDifference.toLong(),
+        weatherUnit = if(weatherUnit == WeatherUnit.METRIC) 0 else 1
+    )
+
+fun SettingsEntity.toSettings() =
+    Settings(
+        tempDifference = tempDifference?.toInt() ?: 0,
+        weatherUnit = if(weatherUnit?.toInt() == 0) WeatherUnit.METRIC else WeatherUnit.IMPERIAL
+    )
